@@ -64,13 +64,20 @@ client.on("messageCreate", (message) => {
     // Timeout Command
     if (message.content.startsWith(prefix + "tm")) {
         if (!message.member.permissions.has("MuteMembers")) return message.reply("❌ Missing permissions!");
+        
+        const args = message.content.trim().split(/ +/);
         let member = message.mentions.members.first();
         if (!member) return message.reply("❓ Please mention a user.");
 
-        let duration = 1 * 60 * 1000; // 1 Minute
+        // أخذ الرقم المكتوب بعد المنشن مباشرة
+        let minutes = parseInt(args[2]);
+        if (!minutes || isNaN(minutes)) return message.reply("❓ Please specify minutes, e.g., `tm @user 10`");
+
+        let duration = minutes * 60 * 1000;
+        
         member.timeout(duration, "Rule violation")
-            .then(() => message.reply(`🤐 **${member.user.tag}** has been timed out for 1m.`))
-            .catch(() => message.reply("❌ Failed to apply timeout."));
+            .then(() => message.reply(`**${member.user.tag}** has been timed out for **${minutes}m**.`))
+            .catch(() => message.reply("❌ Failed to apply timeout. Check bot permissions."));
     }
 });
 
