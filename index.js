@@ -81,4 +81,4 @@ app.listen(3000, () => console.log("Server ready on port 3000"));
 
 
 
-client.login(token);
+client.login(process.env.TOKEN);
