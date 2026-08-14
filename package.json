@@ -1,0 +1,19 @@
+{
+  "name": "wagner-sys",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "ascii-table": "^0.0.9",
+    "discord.js": "^14.27.0",
+    "express": "^5.2.1",
+    "fs": "^0.0.1-security"
+  }
+}
