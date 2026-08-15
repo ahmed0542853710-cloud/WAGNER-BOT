@@ -113,10 +113,10 @@ client.on("messageCreate", (message) => {
 // event الترحيب الفخم
 client.on("guildMemberAdd", async (member) => {
     // ID روم الترحيب الخاصة بسيرفرك
-    const welcomeChannelId = "1395447275982946374"; 
-    const channel = member.guild.channels.cache.get(welcomeChannelId);
+    const welcomeChannelId = "1395447275982946374";
+    const channel = member.guild.channels.cache.get(welcomeChannelId) || await member.guild.channels.fetch(welcomeChannelId).catch(() => null);
 
-    if (!channel) return;
+    if (!channel) return console.log("❌ لم يتم العثور على روم الترحيب!");
 
     // تصميم البطاقة الفخمة
     const welcomeEmbed = new EmbedBuilder()
