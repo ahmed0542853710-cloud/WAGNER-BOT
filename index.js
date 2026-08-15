@@ -78,9 +78,9 @@ client.on("messageCreate", (message) => {
         member.timeout(duration, "Rule violation")
             .then(() => message.reply(`**${member.user.tag}** has been timed out for **${minutes}m**.`))
             .catch(() => message.reply("❌ Failed to apply timeout. Check bot permissions."));
-    }
-});
-// Clear Command
+    } // السطر 81: إغلاق أمر tm فقط
+
+    // Clear Command
     if (message.content.startsWith(prefix + "clear")) {
         // التحقق من صلاحيات العضو
         if (!message.member.permissions.has("ManageMessages")) {
