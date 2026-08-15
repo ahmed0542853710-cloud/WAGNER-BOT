@@ -108,6 +108,7 @@ client.on("messageCreate", (message) => {
                 message.reply("❌ حدث خطأ أثناء مسح الرسائل. (تنبيه: لا يمكن مسح الرسائل التي مر عليها أكثر من 14 يوماً).");
             });
     }
+});
 
 // event الترحيب الفخم
 client.on("guildMemberAdd", async (member) => {
