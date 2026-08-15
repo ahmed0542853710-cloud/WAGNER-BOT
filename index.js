@@ -134,17 +134,17 @@ client.on("guildMemberAdd", async (member) => {
         )
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 512 }))
         .setImage("https://cdn.discordapp.com/attachments/1395743517875372062/1534945621327478865/Gemini_Generated_Image_fueabcfueabcfuea.png?ex=6a812dc2&is=6a7fdc42&hm=14a49dd797d897a0efb9decfdb0bf04e4930910bf89b38322d4d1460693a7367&")
-        .setFooter({ 
-            text: `${member.user.tag} • WAGNER SYSTEM`, 
-            iconURL: member.user.displayAvatarURL({ dynamic: true }) 
+       .setFooter({
+            text: `${member.user.tag} • WAGNER SYSTEM`,
+            iconURL: member.user.displayAvatarURL({ dynamic: true })
         })
         .setTimestamp();
 
-    // إرسال الرسالة مع منشن للعضو
-    channel.send({ 
-        content: `👋 مرحباً بك ${member}!`, 
-        embeds: [welcomeEmbed] 
-    });
+        // إرسال البطاقة والمنشن معاً
+        channel.send({
+        content: `👋 مرحباً بك ${member}!`,
+        embeds: [welcomeEmbed]
+    }).catch(err => console.error("خطأ في إرسال الترحيب:", err));
 });
 
 client.on("messageCreate", async (message) => {
