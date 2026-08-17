@@ -7,15 +7,16 @@ const client = new Client({
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
         GatewayIntentBits.GuildMembers,
-    ],
+    ]
 });
 
 const { readdirSync } = require('node:fs');
 readdirSync("./handlers").forEach(handler => {
-    require(`./handlers/${handler}`)(client)
+    require(`./handlers/${handler}`)(client);
 });
 
-client.on("messageCreate", (message) => {
+// ==================== أوامر الـ Prefix Messages ====================
+client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
     // SR Command
@@ -65,25 +66,23 @@ client.on("messageCreate", (message) => {
     // Timeout Command
     if (message.content.startsWith(prefix + "tm")) {
         if (!message.member.permissions.has("MuteMembers")) return message.reply("❌ Missing permissions!");
-        
+
         const args = message.content.trim().split(/ +/);
         let member = message.mentions.members.first();
         if (!member) return message.reply("❓ Please mention a user.");
 
-        // أخذ الرقم المكتوب بعد المنشن مباشرة
         let minutes = parseInt(args[2]);
         if (!minutes || isNaN(minutes)) return message.reply("❓ Please specify minutes, e.g., `tm @user 10`");
 
         let duration = minutes * 60 * 1000;
-        
+
         member.timeout(duration, "Rule violation")
-            .then(() => message.reply(`**${member.user.tag}** has been timed out for **${minutes}m**.`))
+            .then(() => message.reply(`⏰ **${member.user.tag}** has been timed out for **${minutes}m**.`))
             .catch(() => message.reply("❌ Failed to apply timeout. Check bot permissions."));
-    } // السطر 81: إغلاق أمر tm فقط
+    }
 
     // Clear Command
     if (message.content.startsWith(prefix + "clear")) {
-        // التحقق من صلاحيات العضو
         if (!message.member.permissions.has("ManageMessages")) {
             return message.reply("❌ ليس لديك صلاحية مسح الرسائل!");
         }
@@ -92,31 +91,23 @@ client.on("messageCreate", (message) => {
         let amount = parseInt(args[1]);
 
         if (!amount || isNaN(amount) || amount < 1 || amount > 100) {
-            return message.reply("❓ يرجى تحديد عدد الرسائل المراد مسحها (من 1 إلى 100)، مثال: `!clear 10`");
+            return message.reply("❓ يرجى تحديد عدد الرسائل المراد مسحها (من 1 إلى 100)، مثال: `clear 10`");
         }
 
-        // مسح الرسائل
         message.channel.bulkDelete(amount, true)
             .then(deleted => {
                 message.channel.send(`🧹 تم مسح **${deleted.size}** رسالة بنجاح.`)
                     .then(msg => {
-                        // حذف رسالة التأكيد بعد 3 ثواني
                         setTimeout(() => msg.delete().catch(() => {}), 3000);
                     });
             })
             .catch(err => {
                 console.error(err);
-                message.reply("❌ حدث خطأ أثناء مسح الرسائل. (تنبيه: لا يمكن مسح الرسائل التي مر عليها أكثر من 14 يوماً).");
+                message.reply("❌ حدث خطأ أثناء مسح الرسائل. (تنبيه: لا يمكن مسح الرسائل التي مر عليها أكثر من 14 يوماً)");
             });
     }
-});
 
-
-
-client.on("messageCreate", async (message) => {
-    if (message.author.bot) return;
-
-// Lock Command
+    // Lock Command
     if (message.content === prefix + "قفل") {
         if (!message.member.permissions.has("ManageChannels")) {
             return message.reply("❌ No permission!");
@@ -134,84 +125,97 @@ client.on("messageCreate", async (message) => {
         message.channel.send("🔓 Channel unlocked.");
     }
 
-// Ticket Panel Command
-if (message.content === prefix + "ticket") {
-    if (!message.member.permissions.has("Administrator")) {
-        return message.reply("❌ No permission!");
-    }
-
-    const ticketEmbed = new EmbedBuilder()
-        .setColor("2b2d31")
-        .setTitle("📩 Support Ticket")
-        .setDescription("Click the button below to open a support ticket.");
-
-    const row = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-            .setCustomId("create_ticket")
-            .setLabel("Open Ticket 🎫")
-            .setStyle(ButtonStyle.Primary)
-    );
-
-    message.channel.send({ embeds: [ticketEmbed], components: [row] });
-}
-}); // إغلاق حدث messageCreate
-
-// Ticket Buttons Interaction (وضع هنا خارج messageCreate)
-client.on("interactionCreate", async (interaction) => {
-    if (!interaction.isButton()) return;
-
-    // فتح التكت
-    if (interaction.customId === "create_ticket") {
-        const channelName = `ticket-${interaction.user.username}`;
-        
-        const existingChannel = interaction.guild.channels.cache.find(c => c.name === channelName);
-        if (existingChannel) {
-            return interaction.reply({ content: `❌ You already have a ticket: ${existingChannel}`, ephemeral: true });
+    // Ticket Panel Command
+    if (message.content === prefix + "ticket") {
+        if (!message.member.permissions.has("Administrator")) {
+            return message.reply("❌ No permission!");
         }
 
-        const ticketChannel = await interaction.guild.channels.create({
-            name: channelName,
-            type: 0,
-            permissionOverwrites: [
-                { id: interaction.guild.id, deny: ["ViewChannel"] },
-                { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "AttachFiles"] }
-            ]
-        });
+        const ticketEmbed = new EmbedBuilder()
+            .setColor("2b2d31")
+            .setTitle("📩 Support Ticket")
+            .setDescription("Click the button below to open a support ticket.");
 
-        const closeRow = new ActionRowBuilder().addComponents(
+        const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder()
-                .setCustomId("close_ticket")
-                .setLabel("Close Ticket 🔒")
-                .setStyle(ButtonStyle.Danger)
+                .setCustomId("create_ticket")
+                .setLabel("Open Ticket 🎫")
+                .setStyle(ButtonStyle.Primary)
         );
 
-        await ticketChannel.send({
-            content: `Welcome ${interaction.user}! Staff will be with you shortly.`,
-            components: [closeRow]
-        });
-
-        interaction.reply({ content: `✅ Ticket created: ${ticketChannel}`, ephemeral: true });
-    }
-
-    // إغلاق التكت
-    if (interaction.customId === "close_ticket") {
-        await interaction.reply("🔒 Closing ticket in 3 seconds...");
-        setTimeout(() => interaction.channel.delete().catch(() => {}), 3000);
+        message.channel.send({ embeds: [ticketEmbed], components: [row] });
     }
 });
 
+// ==================== التفاعلات (أمر السلاش /ping + أزرار التذاكر) ====================
+client.on("interactionCreate", async (interaction) => {
+    try {
+        // 1️⃣ الرد على أمر السلاش /ping
+        if (interaction.isChatInputCommand()) {
+            if (interaction.commandName === "ping") {
+                return await interaction.reply({
+                    content: "🏓 **Pong!** البوت يعمل ونشط وجاهز للحصول على شارة المطور!",
+                    ephemeral: false
+                });
+            }
+        }
 
-// ==================== تسجيل أمر /ping ====================
+        // 2️⃣ التعامل مع أزرار التذاكر
+        if (interaction.isButton()) {
+            // فتح التكة
+            if (interaction.customId === "create_ticket") {
+                const channelName = `ticket-${interaction.user.username}`;
+                const existingChannel = interaction.guild.channels.cache.find(c => c.name === channelName);
+
+                if (existingChannel) {
+                    return interaction.reply({ content: `❌ You already have a ticket: ${existingChannel}`, ephemeral: true });
+                }
+
+                const ticketChannel = await interaction.guild.channels.create({
+                    name: channelName,
+                    type: 0,
+                    permissionOverwrites: [
+                        { id: interaction.guild.id, deny: ["ViewChannel"] },
+                        { id: interaction.user.id, allow: ["ViewChannel", "SendMessages", "AttachFiles"] }
+                    ]
+                });
+
+                const closeRow = new ActionRowBuilder().addComponents(
+                    new ButtonBuilder()
+                        .setCustomId("close_ticket")
+                        .setLabel("Close Ticket 🔒")
+                        .setStyle(ButtonStyle.Danger)
+                );
+
+                await ticketChannel.send({
+                    content: `Welcome ${interaction.user}! Staff will be with you shortly.`,
+                    components: [closeRow]
+                });
+
+                return interaction.reply({ content: `✅ Ticket created: ${ticketChannel}`, ephemeral: true });
+            }
+
+            // إغلاق التكة
+            if (interaction.customId === "close_ticket") {
+                await interaction.reply("🔒 Closing ticket in 3 seconds...");
+                setTimeout(() => interaction.channel.delete().catch(() => {}), 3000);
+            }
+        }
+    } catch (error) {
+        console.error("❌ خطأ في التفاعل:", error);
+    }
+});
+
+// ==================== تسجيل أمر /ping دائم لدى ديسكورد ====================
 client.once('ready', async () => {
-    console.log(`🟢 البوت يعمل بنجاح: ${client.user.tag}`);
+    console.log(`🟢 البوت يعمل بنجاح باسم: ${client.user.tag}`);
 
     const commands = [
         new SlashCommandBuilder()
             .setName('ping')
-            .setDescription('اختبار استجابة البوت للشارة'),
+            .setDescription('اختبار استجابة البوت لشارة المطور'),
     ];
 
-    // قراءة التوكن من Render (process.env.TOKEN) أو من config.json
     const botToken = process.env.TOKEN || token;
     const rest = new REST({ version: '10' }).setToken(botToken);
 
@@ -220,17 +224,17 @@ client.once('ready', async () => {
             Routes.applicationCommands(client.user.id),
             { body: commands }
         );
-        console.log('✅ تم تسجيل أمر /ping لدى ديسكورد بنجاح!');
+        console.log('✅ تم تسجيل أمر /ping بنجاح لدى ديسكورد!');
     } catch (error) {
         console.error('❌ خطأ في تسجيل أمر السلاش:', error);
     }
 });
 
-// سيرفر Express لإبقاء البوت حيّاً (Keep-Alive)
+// ==================== سيرفر Express لإبقاء البوت حياً ====================
 const express = require("express");
 const app = express();
 app.get("/", (req, res) => res.send("Bot is alive!"));
 app.listen(3000, () => console.log("Server ready on port 3000"));
 
-// تسجيل الدخول بالتوكن المقروء من Environment
+// تسجيل الدخول بالتوكن
 client.login(process.env.TOKEN || token);
