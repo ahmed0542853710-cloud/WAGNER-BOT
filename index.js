@@ -202,7 +202,7 @@ client.on("interactionCreate", async (interaction) => {
 
 
 // تسجيل أمر السلاش /ping لدى ديسكورد
-const { REST, Routes, SlashCommandBuilder } = require("discord.js");
+
 
 const commands = [
     new SlashCommandBuilder()
