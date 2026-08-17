@@ -1,4 +1,4 @@
-const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
+const { Client, GatewayIntentBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, REST, Routes, SlashCommandBuilder } = require("discord.js");
 const { token, prefix } = require("./config.json");
 
 const client = new Client({
@@ -201,10 +201,68 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 
+
+// ==================== أمر السلاش للحصول على الشارة ====================
+const commands = [
+    new SlashCommandBuilder()
+        .setName('ping')
+        .setDescription('يتحقق من استجابة البوت'),
+];
+
+// ملاحظة: تأكد أن متغير token معرف أعلى الملف أو استخدم client.token
+const rest = new REST({ version: '10' }).setToken(token);
+
+(async () => {
+    try {
+        console.log('🔄 جاري تسجيل أمر السلاش /ping...');
+        if (client.user) {
+            await rest.put(
+                Routes.applicationCommands(client.user.id),
+                { body: commands },
+            );
+            console.log('✅ تم تسجيل أمر السلاش بنجاح!');
+        }
+    } catch (error) {
+        console.error('❌ خطأ في تسجيل أمر السلاش:', error);
+    }
+})();
+
+// عند جاهزية البوت يتم تسجيل الأمر تلقائياً
+client.once('ready', async () => {
+    try {
+        await rest.put(
+            Routes.applicationCommands(client.user.id),
+            { body: commands },
+        );
+        console.log('✅ تم ربط أمر السلاش /ping بالبوات بنجاح!');
+    } catch (error) {
+        console.error(error);
+    }
+});
+
+// الرد على أمر /ping
+client.on('interactionCreate', async interaction => {
+    if (!interaction.isChatInputCommand()) return;
+
+    if (interaction.commandName === 'ping') {
+        await interaction.reply('🏓 Pong! البوت يعمل وستحصل على الشارة قريباً!');
+    }
+});
+
+
+
+
+
+
+
 const express = require("express");
 const app = express();
 app.get("/", (req, res) => res.send("Bot is alive!"));
 app.listen(3000, () => console.log("Server ready on port 3000"));
+
+
+
+
 
 
 
