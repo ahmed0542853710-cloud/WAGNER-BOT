@@ -201,41 +201,36 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 
-// تسجيل أمر السلاش /ping لدى ديسكورد
-
-
-const commands = [
-    new SlashCommandBuilder()
-        .setName('ping')
-        .setDescription('اختبار استجابة البوت للشارة'),
-];
-
-const rest = new REST({ version: '10' }).setToken(token);
-
+// ==================== تسجيل أمر /ping ====================
 client.once('ready', async () => {
+    console.log(`🟢 البوت يعمل بنجاح: ${client.user.tag}`);
+
+    const commands = [
+        new SlashCommandBuilder()
+            .setName('ping')
+            .setDescription('اختبار استجابة البوت للشارة'),
+    ];
+
+    // قراءة التوكن من Render (process.env.TOKEN) أو من config.json
+    const botToken = process.env.TOKEN || token;
+    const rest = new REST({ version: '10' }).setToken(botToken);
+
     try {
         await rest.put(
             Routes.applicationCommands(client.user.id),
             { body: commands }
         );
-        console.log('✅ تم تسجيل أمر /ping بنجاح لدى ديسكورد!');
+        console.log('✅ تم تسجيل أمر /ping لدى ديسكورد بنجاح!');
     } catch (error) {
-        console.error('❌ خطأ في تسجيل الأمر:', error);
+        console.error('❌ خطأ في تسجيل أمر السلاش:', error);
     }
 });
 
-
-
-
+// سيرفر Express لإبقاء البوت حيّاً (Keep-Alive)
 const express = require("express");
 const app = express();
 app.get("/", (req, res) => res.send("Bot is alive!"));
 app.listen(3000, () => console.log("Server ready on port 3000"));
 
-
-
-
-
-
-
-client.login(process.env.TOKEN);
+// تسجيل الدخول بالتوكن المقروء من Environment
+client.login(process.env.TOKEN || token);
