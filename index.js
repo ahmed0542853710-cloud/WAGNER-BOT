@@ -201,56 +201,28 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 
+// تسجيل أمر السلاش /ping لدى ديسكورد
+const { REST, Routes, SlashCommandBuilder } = require("discord.js");
 
-// ==================== أمر السلاش للحصول على الشارة ====================
 const commands = [
     new SlashCommandBuilder()
         .setName('ping')
-        .setDescription('يتحقق من استجابة البوت'),
+        .setDescription('اختبار استجابة البوت للشارة'),
 ];
 
-// ملاحظة: تأكد أن متغير token معرف أعلى الملف أو استخدم client.token
 const rest = new REST({ version: '10' }).setToken(token);
 
-(async () => {
-    try {
-        console.log('🔄 جاري تسجيل أمر السلاش /ping...');
-        if (client.user) {
-            await rest.put(
-                Routes.applicationCommands(client.user.id),
-                { body: commands },
-            );
-            console.log('✅ تم تسجيل أمر السلاش بنجاح!');
-        }
-    } catch (error) {
-        console.error('❌ خطأ في تسجيل أمر السلاش:', error);
-    }
-})();
-
-// عند جاهزية البوت يتم تسجيل الأمر تلقائياً
 client.once('ready', async () => {
     try {
         await rest.put(
             Routes.applicationCommands(client.user.id),
-            { body: commands },
+            { body: commands }
         );
-        console.log('✅ تم ربط أمر السلاش /ping بالبوات بنجاح!');
+        console.log('✅ تم تسجيل أمر /ping بنجاح لدى ديسكورد!');
     } catch (error) {
-        console.error(error);
+        console.error('❌ خطأ في تسجيل الأمر:', error);
     }
 });
-
-// الرد على أمر /ping
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isChatInputCommand()) return;
-
-    if (interaction.commandName === 'ping') {
-        await interaction.reply('🏓 Pong! البوت يعمل وستحصل على الشارة قريباً!');
-    }
-});
-
-
-
 
 
 
