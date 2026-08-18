@@ -207,20 +207,8 @@ client.on("interactionCreate", async (interaction) => {
 });
 
 // ==================== تسجيل أمر /ping دائم لدى ديسكورد ====================
-client.once('ready', async () => {
-    // جلب التوكن بشكل صحيح لتسجيل أوامر السلاش
-    const token = process.env.TOKEN || require('./config.json').token;
-    const rest = new REST({ version: '10' }).setToken(token);
-
-    try {
-        await rest.put(
-            Routes.applicationCommands(client.user.id),
-            { body: commands }
-        );
-        console.log('✅ تم تسجيل أمر /ping بنجاح لدى ديسكورد!');
-    } catch (error) {
-        console.error('❌ خطأ في تسجيل أمر السلاش:', error);
-    }
+client.once('ready', () => {
+    console.log(`🟢 تم الاتصال بالديسكورد بنجاح باسم: ${client.user.tag}`);
 });
 
 // ======================= سيرفر Express لإبقاء البوت حيًا =======================
@@ -231,8 +219,6 @@ app.listen(3000, () => console.log("Server ready on port 3000"));
 
 // تسجيل الدخول
 const finalToken = process.env.TOKEN || require('./config.json').token;
-client.login(finalToken).then(() => {
-    console.log(`🟢 تم الاتصال بالديسكورد بنجاح!`);
-}).catch(err => {
+client.login(finalToken).catch(err => {
     console.error("🔴 خطأ أثناء تسجيل الدخول:", err.message);
 });
